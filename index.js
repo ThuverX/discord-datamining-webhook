@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const { Webhook, MessageBuilder } = require('discord-webhook-node')
 const fetch = require('node-fetch')
 const { promises: fs} = require('fs')
@@ -5,7 +7,7 @@ const { promises: fs} = require('fs')
 const db_path = './db.json'
 const epoch = new Date()
 
-const hook = new Webhook('https://canary.discord.com/api/webhooks/847810818322333746/_kzfe75dnmzGO_5lMdaMpvhR50DLCffkJWiXtppXB1B3O3fUnhTz4VLjqsLUD22k6ipp')
+const hook = new Webhook(process.env.HOOKURL)
  
 hook.setUsername('Discord Datamining')
 
@@ -36,7 +38,7 @@ function createMessage(commit_name, commit_url, commit_body) {
             components: [
                 {
                     type: 2,
-                    label: "Commit on Github",
+                    label: "View on Github",
                     style: 5,
                     url: commit_url
                 }
