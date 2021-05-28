@@ -7,6 +7,8 @@ const { promises: fs} = require('fs')
 const db_path = './db.json'
 const epoch = new Date()
 
+if(!process.env.HOOKURL) throw 'Invalid webhook url: ' + process.env.HOOKURL
+
 const hook = new Webhook(process.env.HOOKURL)
  
 hook.setUsername('Discord Datamining')
