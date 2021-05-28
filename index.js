@@ -13,7 +13,7 @@ const hook = new Webhook(process.env.HOOKURL)
  
 hook.setUsername('Discord Datamining')
 
-setInterval(() => check(), 60e4)
+setInterval(() => check(), 36e5)
 
 check()
 
