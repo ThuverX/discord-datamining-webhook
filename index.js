@@ -59,35 +59,39 @@ function wait(time = 1000) {
 
 async function check() {
     try {
-        await fs.lstat(db_path)
-    } catch(e) {
-        await fs.writeFile(db_path, '[]')
-    }
+        try {
+            await fs.lstat(db_path)
+        } catch(e) {
+            await fs.writeFile(db_path, '[]')
+        }
 
-    let json = await (await fetch('https://api.github.com/repos/Discord-Datamining/Discord-Datamining/commits')).json()
-    let old_ids = JSON.parse(await fs.readFile(db_path)) || []
-    let changed_ids = []
+        let json = await (await fetch('https://api.github.com/repos/Discord-Datamining/Discord-Datamining/commits')).json()
+        let old_ids = JSON.parse(await fs.readFile(db_path)) || []
+        let changed_ids = []
 
-    for(let {sha, commit} of json) {
-        if(commit.comment_count > 0) {
-            let comments = await(await fetch(`https://api.github.com/repos/Discord-Datamining/Discord-Datamining/commits/${sha}/comments`)).json()
+        for(let {sha, commit} of json) {
+            if(commit.comment_count > 0) {
+                let comments = await(await fetch(`https://api.github.com/repos/Discord-Datamining/Discord-Datamining/commits/${sha}/comments`)).json()
 
-            if(!comments[0].id) continue
+                if(!comments[0].id) continue
 
-            for(let {id, created_at, body, html_url} of comments) {
-                if(new Date(created_at).getTime() > epoch.getTime()) {
-                    if(!old_ids.includes(id)) {
-                        hook.send(createMessage(commit.message.split(' - ')[1], html_url, body))
-                        changed_ids.push(id)
+                for(let {id, created_at, body, html_url} of comments) {
+                    if(new Date(created_at).getTime() > epoch.getTime()) {
+                        if(!old_ids.includes(id)) {
+                            hook.send(createMessage(commit.message.split(' - ')[1], html_url, body))
+                            changed_ids.push(id)
 
-                        await wait(1000)
+                            await wait(1000)
+                        }
                     }
                 }
             }
         }
+
+        await fs.writeFile(db_path, JSON.stringify([...old_ids, ...changed_ids]))
+
+        console.log(`PULSE sent ${ changed_ids.length } updates`)
+    } catch(e) {
+        console.log('Error: ' + e)
     }
-
-    await fs.writeFile(db_path, JSON.stringify([...old_ids, ...changed_ids]))
-
-    console.log(`PULSE sent ${ changed_ids.length } updates`)
 }
