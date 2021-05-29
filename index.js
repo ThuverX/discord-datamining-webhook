@@ -66,12 +66,23 @@ async function check() {
         }
 
         let json = await (await fetch('https://api.github.com/repos/Discord-Datamining/Discord-Datamining/commits')).json()
+
+        if(!Array.isArray(json)) {
+            console.log('JSON ERROR: ')
+            throw JSON.stringify(json)
+        }
+
         let old_ids = JSON.parse(await fs.readFile(db_path)) || []
         let changed_ids = []
 
         for(let {sha, commit} of json) {
             if(commit.comment_count > 0) {
                 let comments = await(await fetch(`https://api.github.com/repos/Discord-Datamining/Discord-Datamining/commits/${sha}/comments`)).json()
+
+                if(!Array.isArray(comments)) {
+                    console.log('JSON ERROR: ')
+                    throw JSON.stringify(comments)
+                }
 
                 if(!comments[0].id) continue
 
