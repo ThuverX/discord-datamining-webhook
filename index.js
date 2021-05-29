@@ -5,7 +5,9 @@ const fetch = require('node-fetch')
 const { promises: fs} = require('fs')
 
 const db_path = './db.json'
+
 const epoch = new Date()
+epoch.setDate(epoch.getDate() - 1)
 
 if(!process.env.HOOKURL) throw 'Invalid webhook url: ' + process.env.HOOKURL
 
@@ -70,7 +72,9 @@ async function check() {
         if(commit.comment_count > 0) {
             let comments = await(await fetch(`https://api.github.com/repos/Discord-Datamining/Discord-Datamining/commits/${sha}/comments`)).json()
 
-            for(let {id, created_at, body, html_url} of [comments[0]]) {
+            if(!comments[0].id) continue
+
+            for(let {id, created_at, body, html_url} of comments) {
                 if(new Date(created_at).getTime() > epoch.getTime()) {
                     if(!old_ids.includes(id)) {
                         hook.send(createMessage(commit.message.split(' - ')[1], html_url, body))
